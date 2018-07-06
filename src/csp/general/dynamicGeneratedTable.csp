@@ -1,0 +1,47 @@
+<!--Demo of (re-)loading a table dynamically in a page-->
+<HTML>
+<HEAD>
+<TITLE>   Cache Server Page To Demo Table Re-Render</TITLE>
+</HEAD>
+<BODY>
+<TABLE ID=TEST border="1">
+  <tr>
+    <td>SSN</td><td>Name</td>
+  </tr>
+</TABLE>
+<hr>
+<input type="Button" name="render" value="Create Table"
+    OnClick="#server(..renderTable())#;">
+ 
+<script language = Cache method = renderTable arguments = "">
+ 
+    // Get everyone's SSN and Name from the sample database
+    &sql(declare TEST cursor for select SSN,Name from Sample.Person)
+    &sql(open TEST)
+ 
+    // Output the javascript that will delete all except the first row from the table
+    write "var rLen = TEST.rows.length;",!
+    write "for (i=1; i<rLen; i++)",!
+    write "{",!
+    write " TEST.deleteRow(1);",!
+    write "}",!
+ 
+    // Now insert each row
+    for i=1:1 {
+        &sql(fetch TEST into :ssn,:name)
+        if SQLCODE'=0 quit
+        write "var x = TEST.insertRow();",!
+        // Now insert each cell into this row
+        write "var y = x.insertCell();",!
+        // We are using simple 'innerText' whereas more sophisticated techniques
+        //   would use similar 'innerHTML'
+        // For example: 'innerHTML="<input type=Text name=SSN value=",ssn,">"'
+        write "y.innerText=",..QuoteJS(ssn),";",!
+        write "var y = x.insertCell();",!
+        write "y.innerText=",..QuoteJS(name),";",!
+    }
+    &sql(close TEST)
+</script>
+         
+</BODY>
+</HTML>
