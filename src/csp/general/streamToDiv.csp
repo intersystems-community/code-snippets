@@ -1,0 +1,62 @@
+<html>
+<head>
+ 
+<!-- Put your page Title here -->
+<title>   Cache Server Page </title>
+</head>
+ 
+<body>
+<script language="cache" runat="server">
+s gc=##class(%GlobalCharacterStream).%New()
+d gc.Write("<p>")
+    for t=1:1:32000 {
+        d gc.Write("a")
+    }
+    d gc.Write("b")
+    d gc.Write("</p>")
+    d gc.SetAttribute("ContentType","text/html")
+    d gc.SetAttribute("Expires",600)
+    d gc.%Save()
+s sid=gc.%Oid()
+s link=##class(%CSP.Page).Link("%25CSP.StreamServer.cls?STREAMOID="_##class(%CSP.Page).Encrypt(sid))
+</script>
+<script type="text/javascript">
+function ahah(url, target) {
+  document.getElementById(target).innerHTML = ' Fetching data...';
+  if (window.XMLHttpRequest) {
+    req = new XMLHttpRequest();
+  } else if (window.ActiveXObject) {
+    req = new ActiveXObject("Microsoft.XMLHTTP");
+  }
+  if (req != undefined) {
+    req.onreadystatechange = function() {ahahDone(url, target);};
+    req.open("GET", url, true);
+    req.send("");
+  }
+}  
+ 
+function ahahDone(url, target) {
+  if (req.readyState == 4) { // only if req is "loaded"
+    if (req.status == 200) { // only if "OK"
+      document.getElementById(target).innerHTML = req.responseText;
+    } else {
+      document.getElementById(target).innerHTML=" AHAH Error:\n"+ req.status + "\n" +req.statusText;
+    }
+  }
+}
+ 
+function load(name, div) {
+    ahah(name,div);
+    return false;
+}
+</script>
+ 
+<input type="button" value="load" onClick="load('#(link)#','text');">
+<p></p>
+ 
+<div id="text">
+<p>this is old content</p>
+</div>
+ 
+</body>
+</html>

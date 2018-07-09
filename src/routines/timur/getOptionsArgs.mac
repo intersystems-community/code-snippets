@@ -1,0 +1,64 @@
+ROUTINE timur.getOptionsArgs
+/// Let assume we want to parse options saved in args array in the form
+///   args=5
+///   args(1)="/o"
+///   args(2)="all"
+///   args(3)="/verbose"
+///   args(4)="the"
+///   args(5)="rest"
+/// we want to get handled boolean options /o and /v (or -o and -v in unix-style)
+///    set option = 0, verbose = 0
+/// we call GetOptions function this way:
+///    GetOptions(.args,"-o",.option,"/verbose|/v",.verbose,"/include:",.include)
+/// NB! This example is handling only boolean options
+#define OptionBoolean 1
+#define OptionString 2
+/// f.k.a. "getOptions"
+test(&args,&fmtDest...) public {
+    #dim known ; known options
+ 
+    // 1. scan options
+    for i=1:2:$get(fmtDest) {
+        #dim opts As %String = $get(fmtDest(i))
+        continue:opts=""
+        for j=1:1:$length(opts,"|") {
+            #dim opt As %String = $zstrip($piece(opts,"|",j), "<>", "-/")
+            #dim lastC As %String = $e(opt,*)
+            #dim optType As %Integer = $case(lastC, ":":$$$OptionString, :$$$OptionBoolean)
+            set opt = $zstrip(opt,"<>",":")
+             
+            set known(opt) = $lb(optType, i + 1) ; remember option type and destination argument pointer
+        }
+    }
+     
+    #dim argsN = "" ; new args without processed known options
+    // 2. process passed args while creating new modified args (without known /options)
+    for i=1:1:$get(args) {
+        #dim arg As %String = $get(args(i))
+        #dim isOption As %Boolean = $case($extract(arg,1),"/":1, "-":1, :0)
+ 
+        if isOption {
+            #dim optInfo = $get(known($zstrip(arg, "<>", "-/:")))
+ 
+            if $length(optInfo)>0 {
+                #dim type As %Integer = $li(optInfo,1)
+                #dim index As %Integer = $li(optInfo,2)
+                if type=$$$OptionBoolean {
+                    set fmtDest(index) = 1
+                } else {
+                    set fmtDest(index) = $get(args($i(i)))
+                }
+            } else {
+                return i ; unknown /option - bails out
+            }
+        } else {
+            set argsN($i(argsN)) = arg
+        }
+    }
+    // 3. save not consumed arguments back to args array
+    if $get(argsN)<$get(args) {
+        kill args merge args = argsN
+    }
+    quit 0
+}
+
