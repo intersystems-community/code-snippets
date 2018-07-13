@@ -19,7 +19,7 @@ Class timleavitt.createThumbnail Extends %RegisteredObject
 	 
 	    //Create the thumbnail
 	    Set tCMD = "convert -size 200x200 "_##class(%File).NormalizeFilenameWithSpaces(pSourceFile)_" -resize 200x200 +profile '*' "_##class(%File).NormalizeFilenameWithSpaces(pDestFile)
-	    Do $zf(-1,tCMD)
+	    Do $zf(-100,tCMD)
 	     
 	    If '##class(%File).Exists(pDestFile) {
 	        Set tSC = $$$ERROR($$$GeneralError,"Thumbnail could not be created.")
