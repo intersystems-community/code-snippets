@@ -3,7 +3,7 @@ Class objectscript.saveFileHTTP Extends %RegisteredObject
 	classmethod test() {
 		Set httprequest = ##class(%Net.HttpRequest).%New()
 		Set httprequest.Server = "docs.intersystems.com"
-		Do httprequest.Get("/documentation/cache/20101/pdfs/GCRN.pdf")
+		Do httprequest.Get("documentation/cache/20172/pdfs/GJSON.pdf")
 		Do $System.OBJ.Dump(httprequest.HttpResponse)
 		 
 		Set stream=##class(%FileBinaryStream).%New()
