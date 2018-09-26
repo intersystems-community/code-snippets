@@ -1,42 +1,38 @@
 class objectscript.createClass Extends %RegisteredObject
 {
-	classmethod test() {
-		; Create a class
-		s c=##class(%ClassDefinition).%New("MyClass")
-		i '$IsObject(c) d $system.Status.DisplayError(c) q
-		s c.Description="This is my test class"_$c(13,10)_"testing %ClassDefinition"
-		s c.Super="%Persistent"
- 
-		; Create a property and add it
-		s p=##class(%PropertyDefinition).%New("MyClass.MyProperty")
-		i '$IsObject(p) d $system.Status.DisplayError(p) k  q
-		s r=c.Properties.Insert(p)
-		i $system.Status.IsError(r) d $system.Status.DisplayError(r) k  q
-		s p.Type="%String"
-		s p.Description="This is a property"
-		s r=p.%Close()
-		i $system.Status.IsError(r) d $system.Status.DisplayError(r) k  q
-		k p
- 
-		; Create a method and add it
-		s m=##class(%MethodDefinition).%New("MyClass.MyMethod")
-		i '$IsObject(m) d $system.Status.DisplayError(m) k  q
-		s r=c.Methods.Insert(m)
-		i $system.Status.IsError(r) d $system.Status.DisplayError(r) k  q
-		s m.ReturnType="%Integer"
-		s m.FormalSpec="x:%Integer,y:%Integer=10"
-		s m.Description="Return product of x and y"
-		s m.CodeMode="code"
-		s m.Code=" new result"_$c(13,10)_" set result=x*y"_$c(13,10)_" quit result"
-		s r=m.%Close()
-		i $system.Status.IsError(r) d $system.Status.DisplayError(r) k  q
-		k m
- 
-		; Save and close the class definition
-		s r=c.%Save()
-		i $system.Status.IsError(r) d $system.Status.DisplayError(r) k  q
-		s r=c.%Close()
-		i $system.Status.IsError(r) d $system.Status.DisplayError(r) k  q
-		k c
-	}
+ClassMethod test() As %Status
+{
+	set sc = $$$OK
+	
+	// Create a class
+	set class = ##class(%ClassDefinition).%New("MyClass")
+	set class.Description = "This is my test class"_$c(13,10)_"testing %ClassDefinition"
+	set class.Super = "%Persistent"
+
+	// Create a property and add it
+	set property = ##class(%PropertyDefinition).%New("MyClass.MyProperty")
+	set property.Type = "%String"
+	set property.Description="This is a property"
+	set sc1 = class.Properties.Insert(property)
+	do:$$$ISERR(sc1) $system.Status.DisplayError(sc1)
+	set sc = $$$ADDSC(sc, sc1)
+	
+	// Create a method and add it
+	set method = ##class(%MethodDefinition).%New("MyClass.MyMethod")
+	set method.ReturnType = "%Integer"
+	set method.FormalSpec = "x:%Integer,y:%Integer=10"
+	set method.Description = "Return product of x and y"
+	set method.CodeMode = "code"
+	set method.Code = " new result"_$c(13,10)_" set result=x*y"_$c(13,10)_" quit result"
+	set sc2 = class.Methods.Insert(method)
+	do:$$$ISERR(sc2) $system.Status.DisplayError(sc2)
+	set sc = $$$ADDSC(sc, sc2)
+	
+	// Save the class definition
+	set sc3 = class.%Save()
+	do:$$$ISERR(sc3) $system.Status.DisplayError(sc3)
+	set sc = $$$ADDSC(sc, sc3)
+	
+	return sc
+}
 }
